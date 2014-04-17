@@ -38,14 +38,30 @@ class WardTree(object):
     def __init__(self):
         ward = cluster.Ward(n_clusters=1, compute_full_tree=True)
         self.ward = ward
+        self.n_levels = 0
 
     def fit(self, pos):
         self.ward.fit(pos)
+        self.n_levels = int(np.log2(len(pos))) + 1
 
     def labels_at_depth(self, depth):
         tt = TreeTraverser(depth, self.ward.children_, self.ward.n_leaves_)
         return tt.labels
 
+    def complete_labels(self):
+        levels = range(1, self.n_levels + 1)
+        complete_labels = np.zeros((self.ward.n_leaves_, self.n_levels), dtype=int)
+        for i, level in enumerate(levels):
+            labels = self.labels_at_depth(level)
+            complete_labels[:, i] = np.asarray(labels).T
+
+        return complete_labels
+
+def get_heir_assignments_from_state_indices(states):
+    #TODO: Implement this function to turn a list of state indices
+    # into a 2d array. Row: time, col: assignment at specified level
+    # Maybe make this yield, and instead just act as a translator
+    pass
 
 def get_count_matrix_from_assignments(assignments, lag_time, n_states):
     pass
